@@ -1,6 +1,7 @@
 import React from 'react';
 import { BusStopSch, BusSch } from './component/search/search';
 import { Favorites } from './component/favorites/favorites';
+import { Arrive } from './component/arrive/arrvie';
 import { StyleSheet, Text, View, TextInput, Button, TouchableOpacity, ScrollView } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -64,6 +65,7 @@ export default function App() {
         <Stack.Screen name="정류장 검색" component={BusStopSch} />
         <Stack.Screen name="버스 검색" component={BusSch} />
         <Stack.Screen name="즐겨찾기" component={Favorites} />
+        <Stack.Screen name="도착시간" component={Arrive} />
       </Stack.Navigator>
     </NavigationContainer>
   );
