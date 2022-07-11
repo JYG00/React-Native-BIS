@@ -1,6 +1,6 @@
 import React from 'react';
 import { BusStopSch, BusSch } from './component/search/search';
-import { Favorites } from './component/favorites/favorites';
+import Favorites from './component/favorites/favorites';
 import { Arrive } from './component/arrive/arrvie';
 import { StyleSheet, Text, View, TextInput, Button, TouchableOpacity, ScrollView } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
@@ -10,7 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 // 홈 화면
 export function Home() {
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       {/* 상태표시줄 공백 */}
       <View style={{ height: 50 }}></View>
       <View style={styles.nav}>
@@ -18,7 +18,7 @@ export function Home() {
         <NavButton props={'버스 검색'} />
         <NavButton props={'즐겨찾기'} />
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
@@ -73,7 +73,7 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    height: '100%',
   },
   nav: {
     height: 150,

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
+import Loading from '../loading/loading';
 
 export function Arrive({ route }) {
   // navigation 으로 받은 keyword
@@ -8,10 +9,14 @@ export function Arrive({ route }) {
   // 사용자에게 보여줄 데이터
   const [data, setData] = useState([]);
 
+  // 대기 시간이 길 경우 로딩 아이콘
+  const [buffering, setBuffering] = useState(false);
+
   let key = 0;
 
   const search = (values) => {
     console.log('search 가동');
+    setBuffering(true);
     setData([]);
     let totalArr = [];
     let bsArr = [];
@@ -39,6 +44,7 @@ export function Arrive({ route }) {
           }
         }
         console.log(totalArr);
+        setBuffering(false);
         setData(totalArr);
       }
     };
@@ -67,8 +73,15 @@ export function Arrive({ route }) {
   };
 
   return (
-    <View>
-      <FlatList data={data} renderItem={renderItem}></FlatList>
+    <View style={{ flex: 1 }}>
+      {buffering && (
+        <View style={{ flex: 1 }}>
+          <Loading />
+        </View>
+      )}
+      <View>
+        <FlatList data={data} renderItem={renderItem}></FlatList>
+      </View>
     </View>
   );
 }
