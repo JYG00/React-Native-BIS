@@ -33,7 +33,7 @@ export default function Loading() {
           style={{
             borderTopWidth: 2,
             borderColor: '#00bfff',
-            backgroundColor: '#f3f3f3',
+            backgroundColor: '#fff0f0',
             borderRadius: 200,
             height: 200,
             width: 200,
@@ -49,6 +49,7 @@ export default function Loading() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#fff0f0',
     justifyContent: 'center',
     alignItems: 'center',
   },

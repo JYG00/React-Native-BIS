@@ -3,9 +3,13 @@ import { StyleSheet, View, TextInput, Text, TouchableOpacity, FlatList, Touchabl
 import { Formik } from 'formik';
 import { useNavigation } from '@react-navigation/native';
 import Loading from '../loading/loading';
+import { LinearGradient } from 'expo-linear-gradient';
 
 // 정류소로 검색 페이지
-export const BusStopSch = () => {
+export const BusStopSch = ({ route }) => {
+  // navigation 으로 받은 테마 색상
+  const [themeColor, setThemeColor] = useState(route.params.themeColor);
+
   const navigation = useNavigation();
   // 총 결과 건수가 담길 공간
   const [resultCount, setResultCount] = useState(0);
@@ -50,19 +54,21 @@ export const BusStopSch = () => {
   // FlatList Item
   const item = ({ item }) => {
     const onPress = () => {
-      navigation.navigate('도착시간', { id: item.id });
+      navigation.navigate('도착시간', { id: item.id, themeColor: themeColor });
     };
 
     return (
-      <TouchableOpacity style={styles.result} onPress={onPress}>
-        <Text style={{ fontSize: 15, color: '#888' }}>{item.id}</Text>
-        <Text style={{ fontSize: 25 }}>{item.name}</Text>
+      <TouchableOpacity onPress={onPress}>
+        <LinearGradient style={styles.result} start={{ x: 0, y: 0 }} end={{ x: 3, y: 0 }} colors={[themeColor[4], themeColor[5], themeColor[6]]}>
+          <Text style={{ fontSize: 15, color: '#888' }}>{item.id}</Text>
+          <Text style={{ fontSize: 25 }}>{item.name}</Text>
+        </LinearGradient>
       </TouchableOpacity>
     );
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={[styles.container, { backgroundColor: themeColor[0] }]}>
       {resultCount === 0 && (
         <Formik initialValues={{ schValue: '' }} onSubmit={onSubmit}>
           {({ handleChange, handleSubmit, values }) => (
@@ -80,7 +86,9 @@ export const BusStopSch = () => {
       <View>
         {resultCount !== 0 && (
           <View>
-            <Text style={styles.title}>검색결과 {resultCount}건 조회</Text>
+            <View style={styles.title}>
+              <Text style={styles.title_txt}>검색결과 {resultCount}건 조회</Text>
+            </View>
             <FlatList data={bstopid} renderItem={item} keyExtractor={(item) => item.id} disableFullscreenUI={false}></FlatList>
           </View>
         )}
@@ -90,7 +98,11 @@ export const BusStopSch = () => {
 };
 
 // 버스로 검색 페이지
-export function BusSch() {
+export function BusSch({ route }) {
+  // navigation 으로 받은 테마 색상
+  const [themeColor, setThemeColor] = useState(route.params.themeColor);
+
+  // 버퍼링 아이콘
   const [buffering, setBuffering] = useState(false);
 
   const navigation = useNavigation();
@@ -155,19 +167,21 @@ export function BusSch() {
   // FlatList Item
   const item = ({ item }) => {
     const onPress = () => {
-      navigation.navigate('도착시간', { id: item.id });
+      navigation.navigate('도착시간', { id: item.id, themeColor: themeColor });
     };
 
     return (
-      <TouchableOpacity style={styles.result} onPress={onPress}>
-        <Text style={{ fontSize: 15, color: '#888' }}>{item.id}</Text>
-        <Text style={{ fontSize: 25 }}>{item.name}</Text>
+      <TouchableOpacity onPress={onPress}>
+        <LinearGradient style={styles.result} start={{ x: 0, y: 0 }} end={{ x: 3, y: 0 }} colors={[themeColor[4], themeColor[5], themeColor[6]]}>
+          <Text style={{ fontSize: 15, color: '#888' }}>{item.id}</Text>
+          <Text style={{ fontSize: 25 }}>{item.name}</Text>
+        </LinearGradient>
       </TouchableOpacity>
     );
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={[styles.container, { backgroundColor: themeColor[0] }]}>
       {resultCount === 0 && (
         <Formik initialValues={{ schValue: '' }} onSubmit={onSubmit}>
           {({ handleChange, handleSubmit, values }) => (
@@ -185,7 +199,9 @@ export function BusSch() {
       <View>
         {resultCount !== 0 && (
           <View>
-            <Text style={styles.title}>{bsNum}번 버스 검색결과</Text>
+            <View style={styles.title}>
+              <Text style={styles.title_txt}>{bsNum}번 버스 검색결과</Text>
+            </View>
             <FlatList data={lineid} renderItem={item} keyExtractor={(item) => item.index}></FlatList>
           </View>
         )}
@@ -195,6 +211,10 @@ export function BusSch() {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff0f0',
+  },
   input: {
     paddingTop: 10,
     paddingBottom: 10,
@@ -202,19 +222,30 @@ const styles = StyleSheet.create({
     fontSize: 20,
     paddingLeft: 20,
     backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    shadowOpacity: 0.34,
+    shadowRadius: 6.27,
+
+    elevation: 10,
   },
   title: {
     position: 'absolute',
-    fontSize: 18,
-    top: 10,
     zIndex: 2,
-    left: 220,
-    backgroundColor: '#00bfff',
-    width: 200,
-    height: 40,
-    color: '#fff',
-    textAlign: 'center',
-    textAlignVertical: 'center',
+    width: '100%',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  title_txt: {
+    fontSize: 20,
+    padding: 10,
+    backgroundColor: '#fff0f0',
+    color: '#000',
+    fontWeight: '500',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -230,7 +261,15 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 80,
     backgroundColor: '#fafafa',
-    borderBottomWidth: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.29,
+    shadowRadius: 4.65,
+
+    elevation: 7,
     color: '#888',
     borderColor: '#888',
     marginBottom: 20,

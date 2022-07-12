@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BusStopSch, BusSch } from './component/search/search';
 import Favorites from './component/favorites/favorites';
 import { Arrive } from './component/arrive/arrvie';
@@ -6,34 +6,82 @@ import { StyleSheet, Text, View, TextInput, Button, TouchableOpacity, ScrollView
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
+import { setColors, getColors } from './component/colors/color';
+import { LinearGradient } from 'expo-linear-gradient';
+import SelectDropdown from 'react-native-select-dropdown';
 
 // 홈 화면
 export function Home() {
+  // sample
+  const countries = ['Pink', 'Black', 'Blue', 'Green'];
+
+  const [themeColor, setThemeColor] = useState();
+  const [isReady, setIsReady] = useState(false);
+  useEffect(() => {
+    setColors('pink');
+
+    let themeColorList = [];
+    getColors().map((colorCode) => colorCode.map((code) => themeColorList.push(code)));
+
+    setThemeColor(themeColorList);
+    setIsReady(true);
+  }, []);
+
   return (
-    <View style={styles.container}>
-      {/* 상태표시줄 공백 */}
-      <View style={{ height: 50 }}></View>
-      <View style={styles.nav}>
-        <NavButton props={'정류장 검색'} />
-        <NavButton props={'버스 검색'} />
-        <NavButton props={'즐겨찾기'} />
+    isReady && (
+      <View style={[styles.container, { backgroundColor: themeColor[0] }]}>
+        {/* 검색 버튼 */}
+        <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 3, y: 0 }} colors={[themeColor[4], themeColor[5], themeColor[6]]} style={styles.nav}>
+          <NavButton props={'정류소 검색'} themeColor={themeColor} />
+          <NavButton props={'버스 검색'} themeColor={themeColor} />
+        </LinearGradient>
+        {/* 테마 변경하기 */}
+        <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 3, y: 0 }} colors={[themeColor[4], themeColor[5], themeColor[6]]} style={[styles.content_top, { borderColor: themeColor[2], marginVertical: 20 }]}>
+          <SelectDropdown
+            buttonStyle={{ backgroundColor: 'transparent', width: '100%' }}
+            buttonTextStyle={styles.HomeText}
+            defaultButtonText="테마 변경하기"
+            data={countries}
+            dropdownStyle={{ backgroundColor: themeColor[0] }}
+            onSelect={(selectedItem, index) => {
+              console.log(selectedItem, index);
+            }}
+            buttonTextAfterSelection={(selectedItem, index) => {
+              return selectedItem;
+            }}
+            rowTextForSelection={(item, index) => {
+              return item;
+            }}
+          ></SelectDropdown>
+        </LinearGradient>
+        {/* 즐겨찾기 */}
+        <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 3, y: 0 }} colors={[themeColor[4], themeColor[5], themeColor[6]]} style={[styles.content_bottom, { borderColor: themeColor[2] }]}>
+          <View>
+            <Text style={[styles.HomeText, { paddingVertical: 10 }]}>즐겨찾기 목록</Text>
+          </View>
+        </LinearGradient>
+        <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 3, y: 0 }} colors={[themeColor[4], themeColor[5], themeColor[6]]} style={[styles.content_bottom, { borderColor: themeColor[2], marginVertical: 5 }]}>
+          <View>
+            <Text style={[styles.HomeText, { paddingVertical: 10 }]}>추가된 목록이 없습니다</Text>
+          </View>
+        </LinearGradient>
       </View>
-    </View>
+    )
   );
 }
 
 // 네비 버튼
-export function NavButton({ props }) {
+export function NavButton({ props, themeColor }) {
   const navigation = useNavigation();
 
   const onPress = () => {
-    navigation.navigate(`${props}`);
+    navigation.navigate(`${props}`, { themeColor: themeColor });
   };
 
   let keyword = null;
 
   switch (props) {
-    case '정류장 검색':
+    case '정류소 검색':
       keyword = '정류소 검색';
       break;
     case '버스 검색':
@@ -47,9 +95,9 @@ export function NavButton({ props }) {
   }
 
   return (
-    <View>
-      <TouchableOpacity style={styles.navBox} onPress={onPress}>
-        <Text style={styles.navText}>{keyword}</Text>
+    <View style={{ flex: 1 }}>
+      <TouchableOpacity style={[styles.navBox, { borderColor: themeColor[2] }]} onPress={onPress}>
+        <Text style={styles.HomeText}>{keyword}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -62,7 +110,7 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="홈">
         <Stack.Screen name="홈" component={Home} />
-        <Stack.Screen name="정류장 검색" component={BusStopSch} />
+        <Stack.Screen name="정류소 검색" component={BusStopSch} />
         <Stack.Screen name="버스 검색" component={BusSch} />
         <Stack.Screen name="즐겨찾기" component={Favorites} />
         <Stack.Screen name="도착시간" component={Arrive} />
@@ -76,23 +124,35 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   nav: {
-    height: 150,
+    height: 90,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: 'pink',
   },
   navBox: {
-    width: 130,
+    borderWidth: 1,
+    width: '100%',
     height: 90,
-    borderRadius: 25,
-    backgroundColor: 'red',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  navText: {
+  HomeText: {
     fontSize: 20,
     color: '#fff',
-    fontWeight: '500',
+    fontWeight: '900',
+  },
+  content_top: {
+    padding: 10,
+    height: 60,
+    borderBottomWidth: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  content_bottom: {
+    height: 'auto',
+    padding: 10,
+    borderBottomWidth: 2,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
