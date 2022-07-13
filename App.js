@@ -2,30 +2,106 @@ import React, { useEffect, useState } from 'react';
 import { BusStopSch, BusSch } from './component/search/search';
 import Favorites from './component/favorites/favorites';
 import { Arrive } from './component/arrive/arrvie';
-import { StyleSheet, Text, View, TextInput, Button, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Button, TouchableOpacity, ScrollView,FlatList } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 import { setColors, getColors } from './component/colors/color';
 import { LinearGradient } from 'expo-linear-gradient';
 import SelectDropdown from 'react-native-select-dropdown';
+import storage from './component/storage/storage';
 
 // 홈 화면
 export function Home() {
+
   // 테마 color (기본 테마 : Pink)
   const colorArr = ['Pink', 'Gray', 'Blue', 'Green'];
   const [themeColor, setThemeColor] = useState();
+  // userBstopList
+  const [userBstopList,setUserBstopList] = useState([]);
+  // 
+  const navigation = useNavigation();
+
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    setColors('Pink');
+    storage
+  .load({
+    key: 'userThemeColor',
+    id:'1',
+
+    autoSync: true,
+
+    syncInBackground: true,
+
+    syncParams: {
+      extraFetchOptions: {
+      },
+      someFlag: true
+    }
+  })
+  .then(ret => {
+    setColors(`${ret.themeColor}`);
 
     let themeColorList = [];
     getColors().map((colorCode) => colorCode.map((code) => themeColorList.push(code)));
 
     setThemeColor(themeColorList);
     setIsReady(true);
+  })
+  .catch(err => {
+    console.warn(err.message);
+    switch (err.name) {
+      case 'NotFoundError':
+        break;
+      case 'ExpiredError':
+        break;
+    }
+  });
+
+  storage
+  .load({
+    key: 'userBstop',
+    id:'2',
+    autoSync: true,
+    syncInBackground: true,
+    syncParams: {
+      extraFetchOptions: {
+      },
+      someFlag: true
+    }
+  })
+  .then(ret => {
+    setUserBstopList(ret);
+  })
+  .catch(err => {
+    switch (err.name) {
+      case 'NotFoundError':
+        console.log('notFound');
+        break;
+      case 'ExpiredError':
+        break;
+    }
+  });
   }, []);
+
+  
+    const renderItem = ({ item }) => {
+   
+      const onPress = () => {
+        navigation.navigate('도착시간', { id: item.BstopId, name:item.BstopName,themeColor: themeColor });
+      }
+
+      return (
+        <TouchableOpacity onPress={onPress}>
+          <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 3, y: 0 }} colors={[themeColor[4], themeColor[5], themeColor[6]]} style={styles.content}>
+            <Text style={{ fontSize: 20, color: '#555', fontWeight: '600' }}>{item.BstopId}</Text>
+            <Text style={{ fontSize: 20, color: '#555', fontWeight: '600' }}>{item.BstopName}</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      );
+    };
+  
 
   return (
     isReady && (
@@ -46,6 +122,16 @@ export function Home() {
             dropdownStyle={{ backgroundColor: themeColor[7] }}
             onSelect={(selectedItem, index) => {
               setColors(selectedItem);
+
+              storage.remove({
+                key: 'userThemeColor',
+                id:'1',
+              });
+
+              storage.save({key:'userThemeColor',id:'1',data:{
+                themeColor:selectedItem
+              }})
+
               let themeColorList = [];
               getColors().map((colorCode) => colorCode.map((code) => themeColorList.push(code)));
 
@@ -67,7 +153,12 @@ export function Home() {
         </LinearGradient>
         <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 3, y: 0 }} colors={[themeColor[4], themeColor[5], themeColor[6]]} style={[styles.content_bottom, { borderColor: themeColor[2], marginVertical: 5 }]}>
           <View>
-            <Text style={[styles.HomeText, { paddingVertical: 10 }]}>추가된 목록이 없습니다</Text>
+            {userBstopList.length!==0?
+            (<View>
+                <FlatList data={userBstopList} renderItem={renderItem} keyExtractor={(item,index)=>index}/>
+            </View>)
+            :
+            (<Text style={[styles.HomeText, { paddingVertical: 10 }]}>추가된 목록이 없습니다</Text>)}
           </View>
         </LinearGradient>
       </View>
@@ -160,4 +251,27 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-});
+  content:{
+    
+      width: '100%',
+      height: 80,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      backgroundColor: '#fafafa',
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 3,
+      },
+      shadowOpacity: 0.29,
+      shadowRadius: 4.65,
+  
+      elevation: 7,
+      color: '#888',
+      borderColor: '#888',
+      marginBottom: 10,
+      paddingLeft: 20,
+      paddingTop: 10,
+    },
+  });

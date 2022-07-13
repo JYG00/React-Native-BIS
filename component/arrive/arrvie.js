@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, ImageBackground } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import Loading from '../loading/loading';
 import { LinearGradient } from 'expo-linear-gradient';
+import storage from '../storage/storage';
 
 export function Arrive({ route }) {
   // navigation 으로 받은 keyword
   const [bstopid, setID] = useState(route.params.id);
+  const [bstopName, setBstopName] = useState(route.params.name);
 
   // navigation 으로 받은 테마 색상
   const [themeColor, setThemeColor] = useState(route.params.themeColor);
@@ -60,6 +62,48 @@ export function Arrive({ route }) {
     search();
   }, [route]);
 
+  // add myList
+  const onPress=()=>{
+    let userBstopArr = [{BstopId:bstopid,BstopName:bstopName}];
+
+    storage
+    .load({
+      key: 'userBstop',
+      id:'2',
+      autoSync: true,
+  
+      syncInBackground: true,
+  
+      syncParams: {
+        extraFetchOptions: {
+        },
+        someFlag: true
+      }
+    })
+    .then(ret => {
+      const result = ret.filter((result)=>result.BstopId === bstopid);
+      // remove 
+      if(result.length>0){
+        alert('rejected');
+        return;
+      }
+      ret.map((result)=>userBstopArr.push(result));
+      storage.save({key:'userBstop',id:'2',data:userBstopArr});
+      //storage.remove({key:'userBstop',id:'2'});
+      alert(`${bstopName} add`);
+    })
+    .catch(err => {
+      console.warn(err.message);
+      switch (err.name) {
+        case 'NotFoundError':
+          storage.save({key:'userBstop',id:'2',data:userBstopArr}); alert(`${bstopName} add`);
+          break;
+        case 'ExpiredError':
+          break;
+      }
+    });
+  }
+
   const renderItem = ({ item }) => {
     let color = '#fff';
 
@@ -84,6 +128,11 @@ export function Arrive({ route }) {
         </View>
       )}
       <View>
+        <View style={styles.title}>
+        <TouchableOpacity onPress={onPress} style={[styles.title_txt,{backgroundColor:themeColor[0]}]}>
+          <Text >Hello</Text>
+          </TouchableOpacity>
+          </View>
         <FlatList data={data} renderItem={renderItem}></FlatList>
       </View>
     </View>
@@ -112,5 +161,29 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingLeft: 20,
     paddingTop: 10,
+  },
+  title: {
+    position: 'absolute',
+    width: '100%',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  title_txt: {
+    zIndex: 2,
+    fontSize: 20,
+    padding: 10,
+    backgroundColor: '#fff0f0',
+    color: '#000',
+    fontWeight: '500',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    shadowOpacity: 0.34,
+    shadowRadius: 6.27,
+
+    elevation: 10,
   },
 });

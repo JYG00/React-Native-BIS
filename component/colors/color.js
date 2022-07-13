@@ -1,4 +1,4 @@
-let colorArr = [];
+let colorArr = ['#fff0f0', '#ffcccc', '#ffe5cc', '#ff0028', '#ffecd2', '#fcb69f', '#ffecd2', '#fbcce7'];
 
 export const setColors = (Color) => {
   colorArr = [];
