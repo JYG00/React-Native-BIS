@@ -9,18 +9,22 @@ import { LinearGradient } from 'expo-linear-gradient';
 export const BusStopSch = ({ route }) => {
   // navigation 으로 받은 테마 색상
   const [themeColor, setThemeColor] = useState(route.params.themeColor);
-
+  // 도착 시간 페이지로 가기 위함
   const navigation = useNavigation();
   // 총 결과 건수가 담길 공간
   const [resultCount, setResultCount] = useState(0);
   // 정류소 정보가 담길 공간
   const [bstopid, setBstopid] = useState([]);
-  const [buffering, setBuffering] = useState(false);
+  // 로딩 아이콘 사용 유무
+  const [loading, setLoading] = useState(false);
+  // 사용자 검색 키워드가 담길 공간
+  const [userKeyword, setUserKeyword] = useState();
 
   const onSubmit = (values) => {
     console.log('val=', values.schValue);
-    setBuffering(true);
+    setLoading(true);
     setBstopid([]);
+    setUserKeyword(values.schValue);
     let bsArr = [];
 
     let xhr = new XMLHttpRequest();
@@ -43,7 +47,7 @@ export const BusStopSch = ({ route }) => {
             bsArr.push({ id: strArr[i].substring(8), name: strArr[i + 2].substring(8) });
           }
         }
-        setBuffering(false);
+        setLoading(false);
         setBstopid(bsArr);
       }
     };
@@ -78,20 +82,31 @@ export const BusStopSch = ({ route }) => {
           )}
         </Formik>
       )}
-      {buffering && (
+      {loading && (
         <View style={{ flex: 1 }}>
-          <Loading />
+          <Loading themeColor={themeColor} />
         </View>
       )}
       <View>
         {resultCount !== 0 && (
           <View>
             <View style={styles.title}>
-              <Text style={styles.title_txt}>검색결과 {resultCount}건 조회</Text>
+              <Text style={[styles.title_txt, { backgroundColor: themeColor[0] }]}>검색결과 {resultCount}건 조회</Text>
             </View>
             <FlatList data={bstopid} renderItem={item} keyExtractor={(item) => item.id} disableFullscreenUI={false}></FlatList>
           </View>
         )}
+        {(() => {
+          if (resultCount !== 0 && bstopid.length === 0) {
+            return (
+              <View style={{ paddingTop: 200, justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={{ fontSize: 20 }}>
+                  <Text style={{ fontWeight: 'bold' }}>{userKeyword}</Text>와(과) 일치하는 검색결과가 없습니다.
+                </Text>
+              </View>
+            );
+          }
+        })()}
       </View>
     </View>
   );
@@ -101,10 +116,9 @@ export const BusStopSch = ({ route }) => {
 export function BusSch({ route }) {
   // navigation 으로 받은 테마 색상
   const [themeColor, setThemeColor] = useState(route.params.themeColor);
-
-  // 버퍼링 아이콘
-  const [buffering, setBuffering] = useState(false);
-
+  // 로딩 아이콘 사용유무
+  const [loading, setLoading] = useState(false);
+  // 도착 시간 페이지로 가기 위함
   const navigation = useNavigation();
   // 총 결과 건수가 담길 공간
   const [resultCount, setResultCount] = useState(0);
@@ -112,6 +126,7 @@ export function BusSch({ route }) {
   const [lineid, setLineid] = useState([]);
   // 버스 번호가 담길 공간
   const [bsNum, setBsNum] = useState();
+
   let index = 0;
 
   const set = (param) => {
@@ -122,7 +137,7 @@ export function BusSch({ route }) {
     console.log('val=', values.schValue);
     set([]);
     setBsNum(values.schValue);
-    setBuffering(true);
+    setLoading(true);
     let bsArr = [];
 
     // 검색할 버스 번호
@@ -156,7 +171,7 @@ export function BusSch({ route }) {
             bsArr.push({ id: strArr[i].substring(7), name: strArr[i - 2].substring(8), index: index++ });
           }
         }
-        setBuffering(false);
+        setLoading(false);
         set(bsArr);
       }
     };
@@ -191,20 +206,29 @@ export function BusSch({ route }) {
           )}
         </Formik>
       )}
-      {buffering && (
+      {loading && (
         <View style={{ flex: 1 }}>
-          <Loading />
+          <Loading themeColor={themeColor} />
         </View>
       )}
       <View>
         {resultCount !== 0 && (
           <View>
             <View style={styles.title}>
-              <Text style={styles.title_txt}>{bsNum}번 버스 검색결과</Text>
+              <Text style={[styles.title_txt, { backgroundColor: themeColor[0] }]}>{bsNum}번 버스 검색결과</Text>
             </View>
             <FlatList data={lineid} renderItem={item} keyExtractor={(item) => item.index}></FlatList>
           </View>
         )}
+        {(() => {
+          if (resultCount !== 0 && lineid.length === 0) {
+            return (
+              <View style={{ paddingTop: 200, justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={{ fontSize: 20 }}>일치하는 검색결과가 없습니다.</Text>
+              </View>
+            );
+          }
+        })()}
       </View>
     </View>
   );
@@ -234,13 +258,13 @@ const styles = StyleSheet.create({
   },
   title: {
     position: 'absolute',
-    zIndex: 2,
     width: '100%',
     justifyContent: 'flex-end',
     alignItems: 'center',
     flexDirection: 'row',
   },
   title_txt: {
+    zIndex: 2,
     fontSize: 20,
     padding: 10,
     backgroundColor: '#fff0f0',

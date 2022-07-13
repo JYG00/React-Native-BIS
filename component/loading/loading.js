@@ -1,8 +1,8 @@
 import React, { useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Button } from 'react-native';
 
-// 즐겨찾기 페이지
-export default function Loading() {
+// 로딩 페이지
+export default function Loading({ themeColor }) {
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0.2)).current;
 
@@ -13,7 +13,7 @@ export default function Loading() {
 
   playAnim();
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: themeColor[0] }]}>
       <View
         style={{
           backgroundColor: 'transparent',
@@ -33,7 +33,7 @@ export default function Loading() {
           style={{
             borderTopWidth: 2,
             borderColor: '#00bfff',
-            backgroundColor: '#fff0f0',
+            backgroundColor: themeColor[0],
             borderRadius: 200,
             height: 200,
             width: 200,
@@ -49,7 +49,6 @@ export default function Loading() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff0f0',
     justifyContent: 'center',
     alignItems: 'center',
   },

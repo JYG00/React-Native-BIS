@@ -12,13 +12,13 @@ import SelectDropdown from 'react-native-select-dropdown';
 
 // 홈 화면
 export function Home() {
-  // sample
-  const countries = ['Pink', 'Black', 'Blue', 'Green'];
-
+  // 테마 color (기본 테마 : Pink)
+  const colorArr = ['Pink', 'Gray', 'Blue', 'Green'];
   const [themeColor, setThemeColor] = useState();
   const [isReady, setIsReady] = useState(false);
+
   useEffect(() => {
-    setColors('pink');
+    setColors('Pink');
 
     let themeColorList = [];
     getColors().map((colorCode) => colorCode.map((code) => themeColorList.push(code)));
@@ -41,10 +41,15 @@ export function Home() {
             buttonStyle={{ backgroundColor: 'transparent', width: '100%' }}
             buttonTextStyle={styles.HomeText}
             defaultButtonText="테마 변경하기"
-            data={countries}
-            dropdownStyle={{ backgroundColor: themeColor[0] }}
+            data={colorArr}
+            rowTextStyle={{ color: '#fff', fontWeight: 'bold' }}
+            dropdownStyle={{ backgroundColor: themeColor[7] }}
             onSelect={(selectedItem, index) => {
-              console.log(selectedItem, index);
+              setColors(selectedItem);
+              let themeColorList = [];
+              getColors().map((colorCode) => colorCode.map((code) => themeColorList.push(code)));
+
+              setThemeColor(themeColorList);
             }}
             buttonTextAfterSelection={(selectedItem, index) => {
               return selectedItem;

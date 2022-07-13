@@ -14,13 +14,13 @@ export function Arrive({ route }) {
   const [data, setData] = useState([]);
 
   // 대기 시간이 길 경우 로딩 아이콘
-  const [buffering, setBuffering] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   let key = 0;
 
   const search = (values) => {
-    console.log('search 가동');
-    setBuffering(true);
+    console.log('search');
+    setLoading(true);
     setData([]);
     let totalArr = [];
     let bsArr = [];
@@ -48,7 +48,7 @@ export function Arrive({ route }) {
           }
         }
         totalArr.pop();
-        setBuffering(false);
+        setLoading(false);
         setData(totalArr);
       }
     };
@@ -63,9 +63,9 @@ export function Arrive({ route }) {
   const renderItem = ({ item }) => {
     let color = '#fff';
 
-    // 5분 밑이면 빨간색, 기본은 파란색 적용
+    // 5분 밑이면 빨간색, 기본은 하얀색 적용
     if (item[1] < 6) {
-      color = '#B22222';
+      color = themeColor[3];
     }
 
     return (
@@ -78,9 +78,9 @@ export function Arrive({ route }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: themeColor[0] }}>
-      {buffering && (
+      {loading && (
         <View style={{ flex: 1 }}>
-          <Loading />
+          <Loading themeColor={themeColor} />
         </View>
       )}
       <View>
