@@ -3,6 +3,8 @@ import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native
 import Loading from '../loading/loading';
 import { LinearGradient } from 'expo-linear-gradient';
 import storage from '../storage/storage';
+// 즐겨찾기 별 모양 아이콘
+import { AntDesign } from '@expo/vector-icons';
 
 export function Arrive({ route }) {
   // navigation 으로 받은 keyword
@@ -17,6 +19,9 @@ export function Arrive({ route }) {
 
   // 대기 시간이 길 경우 로딩 아이콘
   const [loading, setLoading] = useState(false);
+
+  // 즐겨찾기 별 모양 아이콘
+  const [isClick, setIsClick] = useState();
 
   let key = 0;
 
@@ -59,50 +64,88 @@ export function Arrive({ route }) {
   };
 
   useEffect(() => {
+    storage
+      .load({
+        key: 'userBstop',
+        id: '2',
+        autoSync: true,
+        syncInBackground: true,
+        syncParams: {
+          extraFetchOptions: {},
+          someFlag: true,
+        },
+      })
+      .then((ret) => {
+        const result = ret.filter((result) => result.BstopId === bstopid);
+        // 이미 클릭 된 상태라면 즐겨찾기 해제
+        if (result.length > 0) {
+          setIsClick(true);
+        } else {
+          setIsClick(false);
+        }
+      })
+      .catch((err) => {
+        // console.warn(err.message);
+        switch (err.name) {
+          case 'NotFoundError':
+            setIsClick(false);
+            break;
+          case 'ExpiredError':
+            break;
+        }
+      });
     search();
   }, [route]);
 
-  // add myList
-  const onPress=()=>{
-    let userBstopArr = [{BstopId:bstopid,BstopName:bstopName}];
+  // 즐겨찾기 목록 추가 클릭 시
+  const onPress = () => {
+    let userBstopArr = [{ BstopId: bstopid, BstopName: bstopName }];
 
     storage
-    .load({
-      key: 'userBstop',
-      id:'2',
-      autoSync: true,
-  
-      syncInBackground: true,
-  
-      syncParams: {
-        extraFetchOptions: {
+      .load({
+        key: 'userBstop',
+        id: '2',
+        autoSync: true,
+
+        syncInBackground: true,
+
+        syncParams: {
+          extraFetchOptions: {},
+          someFlag: true,
         },
-        someFlag: true
-      }
-    })
-    .then(ret => {
-      const result = ret.filter((result)=>result.BstopId === bstopid);
-      // remove 
-      if(result.length>0){
-        alert('rejected');
-        return;
-      }
-      ret.map((result)=>userBstopArr.push(result));
-      storage.save({key:'userBstop',id:'2',data:userBstopArr});
-      //storage.remove({key:'userBstop',id:'2'});
-      alert(`${bstopName} add`);
-    })
-    .catch(err => {
-      console.warn(err.message);
-      switch (err.name) {
-        case 'NotFoundError':
-          storage.save({key:'userBstop',id:'2',data:userBstopArr}); alert(`${bstopName} add`);
-          break;
-        case 'ExpiredError':
-          break;
-      }
-    });
-  }
+      })
+      .then((ret) => {
+        const result = ret.filter((result) => result.BstopId === bstopid);
+        // 이미 클릭 된 상태라면 즐겨찾기 해제
+        if (result.length > 0) {
+          userBstopArr = [];
+          alert(`${bstopName} 정류소가 즐겨찾기 목록에서 삭제되었습니다.`);
+          setIsClick(false);
+          ret.filter((result) => !result.BstopId.includes(bstopid)).map((data) => userBstopArr.push(data));
+          console.log(userBstopArr);
+          storage.save({ key: 'userBstop', id: '2', data: userBstopArr });
+          return;
+        }
+        // 즐겨찾기에 추가
+        ret.map((result) => userBstopArr.push(result));
+        storage.save({ key: 'userBstop', id: '2', data: userBstopArr });
+        //storage.remove({key:'userBstop',id:'2'});
+        alert(`${bstopName} 정류소가 즐겨찾기 목록에 추가되었습니다`);
+        setIsClick(true);
+      })
+      .catch((err) => {
+        // console.warn(err.message);
+        switch (err.name) {
+          case 'NotFoundError':
+            storage.save({ key: 'userBstop', id: '2', data: userBstopArr });
+            setIsClick(true);
+            alert(`${bstopName} 정류소가 즐겨찾기 목록에 추가되었습니다`);
+            break;
+          case 'ExpiredError':
+            break;
+        }
+      });
+  };
 
   const renderItem = ({ item }) => {
     let color = '#fff';
@@ -128,11 +171,12 @@ export function Arrive({ route }) {
         </View>
       )}
       <View>
+        {/* 즐겨찾기 아이콘 */}
         <View style={styles.title}>
-        <TouchableOpacity onPress={onPress} style={[styles.title_txt,{backgroundColor:themeColor[0]}]}>
-          <Text >Hello</Text>
+          <TouchableOpacity onPress={onPress} style={[styles.title_txt, { backgroundColor: themeColor[0] }]}>
+            {isClick ? <AntDesign name="star" size={24} color="black" /> : <AntDesign name="staro" size={24} color="black" />}
           </TouchableOpacity>
-          </View>
+        </View>
         <FlatList data={data} renderItem={renderItem}></FlatList>
       </View>
     </View>

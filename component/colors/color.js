@@ -14,7 +14,7 @@ export const setColors = (Color) => {
       colorArr.push(['#a8e4a0', '#a3c1ad', '#a8e4a0', '#000', '#0bda51', '#7fff00', '#e9ffdb', '#a8e4a0']);
       break;
     case 'Blue':
-      colorArr.push(['#87cefa', '#a3c1ad', '#87ceeb', '#000', '#ace5ee', '#0fc0fc', '#318ce7', '#87cefa']);
+      colorArr.push(['#add8e6', '#a3c1ad', '#87ceeb', '#000', '#ace5ee', '#0fc0fc', '#318ce7', '#87cefa']);
       break;
     default:
       break;

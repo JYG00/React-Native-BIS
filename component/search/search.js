@@ -1,10 +1,9 @@
-import React, { useState, useRef } from 'react';
-import { StyleSheet, View, TextInput, Text, TouchableOpacity, FlatList, TouchableWithoutFeedback } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View, TextInput, Text, TouchableOpacity, FlatList } from 'react-native';
 import { Formik } from 'formik';
 import { useNavigation } from '@react-navigation/native';
 import Loading from '../loading/loading';
 import { LinearGradient } from 'expo-linear-gradient';
-import storage from '../storage/storage';
 
 // 정류소로 검색 페이지
 export const BusStopSch = ({ route }) => {
@@ -21,6 +20,7 @@ export const BusStopSch = ({ route }) => {
   // 사용자 검색 키워드가 담길 공간
   const [userKeyword, setUserKeyword] = useState();
 
+  // 유저가 input 창에서 엔터를 눌렀을때
   const onSubmit = (values) => {
     console.log('val=', values.schValue);
     setLoading(true);
@@ -59,7 +59,7 @@ export const BusStopSch = ({ route }) => {
   // FlatList Item
   const item = ({ item }) => {
     const onPress = () => {
-      navigation.navigate('도착시간', { id: item.id, name:item.name,themeColor: themeColor });
+      navigation.navigate('도착시간', { id: item.id, name: item.name, themeColor: themeColor });
     };
 
     return (
@@ -183,7 +183,7 @@ export function BusSch({ route }) {
   // FlatList Item
   const item = ({ item }) => {
     const onPress = () => {
-      navigation.navigate('도착시간', { id: item.id, themeColor: themeColor });
+      navigation.navigate('도착시간', { id: item.id, name: item.name, themeColor: themeColor });
     };
 
     return (
