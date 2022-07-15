@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Button } from 'react-native';
 
 // 로딩 페이지
@@ -11,7 +11,10 @@ export default function Loading({ themeColor }) {
     Animated.loop(Animated.timing(opacityAnim, { toValue: 1, duration: 2000, useNativeDriver: true })).start();
   };
 
-  playAnim();
+  useEffect(() => {
+    playAnim();
+  }, []);
+
   return (
     <View style={[styles.container, { backgroundColor: themeColor[0] }]}>
       <View

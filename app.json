@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "expoTest2",
-    "slug": "expoTest2",
+    "name": "RN-BIS",
+    "slug": "RN-BIS",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/bus2.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },

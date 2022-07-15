@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import Loading from '../loading/loading';
 import { LinearGradient } from 'expo-linear-gradient';
 import storage from '../storage/storage';
 // 즐겨찾기 별 모양 아이콘
 import { AntDesign } from '@expo/vector-icons';
+// 홈 아이콘
+import { Entypo } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
 export function Arrive({ route }) {
+  const navigation = useNavigation();
+
   // navigation 으로 받은 keyword
   const [bstopid, setID] = useState(route.params.id);
   const [bstopName, setBstopName] = useState(route.params.name);
@@ -119,7 +124,7 @@ export function Arrive({ route }) {
         // 이미 클릭 된 상태라면 즐겨찾기 해제
         if (result.length > 0) {
           userBstopArr = [];
-          alert(`${bstopName} 정류소가 즐겨찾기 목록에서 삭제되었습니다.`);
+          Alert.alert('알림', `${bstopName} 정류소가 즐겨찾기 목록에서 삭제되었습니다.`, [{ text: '확인' }]);
           setIsClick(false);
           ret.filter((result) => !result.BstopId.includes(bstopid)).map((data) => userBstopArr.push(data));
           console.log(userBstopArr);
@@ -130,7 +135,7 @@ export function Arrive({ route }) {
         ret.map((result) => userBstopArr.push(result));
         storage.save({ key: 'userBstop', id: '2', data: userBstopArr });
         //storage.remove({key:'userBstop',id:'2'});
-        alert(`${bstopName} 정류소가 즐겨찾기 목록에 추가되었습니다`);
+        Alert.alert('알림', `${bstopName} 정류소가 즐겨찾기 목록에 추가되었습니다.`, [{ text: '확인' }]);
         setIsClick(true);
       })
       .catch((err) => {
@@ -139,12 +144,17 @@ export function Arrive({ route }) {
           case 'NotFoundError':
             storage.save({ key: 'userBstop', id: '2', data: userBstopArr });
             setIsClick(true);
-            alert(`${bstopName} 정류소가 즐겨찾기 목록에 추가되었습니다`);
+            Alert.alert('알림', `${bstopName} 정류소가 즐겨찾기 목록에 추가되었습니다.`, [{ text: '확인' }]);
             break;
           case 'ExpiredError':
             break;
         }
       });
+  };
+
+  // 홈 아이콘 클릭 시
+  const onPressHome = () => {
+    navigation.reset({ routes: [{ name: '홈' }] });
   };
 
   const renderItem = ({ item }) => {
@@ -176,6 +186,9 @@ export function Arrive({ route }) {
           <TouchableOpacity onPress={onPress} style={[styles.title_txt, { backgroundColor: themeColor[0] }]}>
             {isClick ? <AntDesign name="star" size={24} color="black" /> : <AntDesign name="staro" size={24} color="black" />}
           </TouchableOpacity>
+          <TouchableOpacity style={[styles.title_txt, { backgroundColor: themeColor[0] }]} onPress={onPressHome}>
+            <Entypo name="home" size={24} color="black" />
+          </TouchableOpacity>
         </View>
         <FlatList data={data} renderItem={renderItem}></FlatList>
       </View>
@@ -185,6 +198,7 @@ export function Arrive({ route }) {
 
 const styles = StyleSheet.create({
   content: {
+    marginVertical: 10,
     width: '100%',
     height: 80,
     flexDirection: 'row',
@@ -202,7 +216,6 @@ const styles = StyleSheet.create({
     elevation: 7,
     color: '#888',
     borderColor: '#888',
-    marginBottom: 10,
     paddingLeft: 20,
     paddingTop: 10,
   },
@@ -218,6 +231,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     padding: 10,
     backgroundColor: '#fff0f0',
+    opacity: 0.5,
     color: '#000',
     fontWeight: '500',
     shadowColor: '#000',

@@ -5,11 +5,14 @@ import { setColors, getColors } from '../colors/color';
 import { LinearGradient } from 'expo-linear-gradient';
 import SelectDropdown from 'react-native-select-dropdown';
 import storage from '../storage/storage';
+// icons
+import { Ionicons } from '@expo/vector-icons';
+import { Fontisto } from '@expo/vector-icons';
 
 // 홈 화면
 export function Home() {
-  // 테마 색상 배열 (기본 테마 : Pink)
-  const colorArr = ['Pink', 'Gray', 'Blue', 'Green'];
+  // 테마 색상 배열 (기본 테마 : Blue)
+  const colorArr = ['Red', 'Green', 'Blue', 'Pink', 'Grey'];
   // 테마가 색상이 들어갈 공간
   const [themeColor, setThemeColor] = useState();
   // route간 이동하기 위함
@@ -45,8 +48,8 @@ export function Home() {
         // console.warn(err.message);
         switch (err.name) {
           case 'NotFoundError':
-            // 유저가 테마를 선택하지 않은 경우 기본 테마 (Pink) 적용
-            setColors('Pink');
+            // 유저가 테마를 선택하지 않은 경우 기본 테마 (Blue) 적용
+            setColors('Blue');
 
             let themeColorList = [];
             getColors().map((colorCode) => colorCode.map((code) => themeColorList.push(code)));
@@ -59,6 +62,28 @@ export function Home() {
         }
       });
   }, []);
+
+  // 테마 변경하기 클릭 시
+  const onSelect = (selectedItem, index) => {
+    setColors(selectedItem);
+    // 기존에 있던 테마를 제거
+    storage.remove({
+      key: 'userThemeColor',
+      id: '1',
+    });
+    // 유저가 선택한 테마 적용
+    storage.save({
+      key: 'userThemeColor',
+      id: '1',
+      data: {
+        themeColor: selectedItem,
+      },
+    });
+    // 테마 색상을 담는 임시 공간
+    let themeColorList = [];
+    getColors().map((colorCode) => colorCode.map((code) => themeColorList.push(code)));
+    setThemeColor(themeColorList);
+  };
 
   // 즐겨찾기 목록 클릭 시
   const onPress = () => {
@@ -81,28 +106,12 @@ export function Home() {
             buttonTextStyle={styles.HomeText}
             defaultButtonText="테마 변경하기"
             data={colorArr}
+            rowStyle={(index) => {
+              console.log(index);
+            }}
             rowTextStyle={{ color: '#fff', fontWeight: 'bold' }}
             dropdownStyle={{ backgroundColor: themeColor[7] }}
-            onSelect={(selectedItem, index) => {
-              setColors(selectedItem);
-              // 기존에 있던 테마를 제거
-              storage.remove({
-                key: 'userThemeColor',
-                id: '1',
-              });
-              // 유저가 선택한 테마 적용
-              storage.save({
-                key: 'userThemeColor',
-                id: '1',
-                data: {
-                  themeColor: selectedItem,
-                },
-              });
-              // 테마 색상을 담는 임시 공간
-              let themeColorList = [];
-              getColors().map((colorCode) => colorCode.map((code) => themeColorList.push(code)));
-              setThemeColor(themeColorList);
-            }}
+            onSelect={onSelect}
             buttonTextAfterSelection={(selectedItem, index) => {
               return selectedItem;
             }}
@@ -111,12 +120,14 @@ export function Home() {
             }}
           ></SelectDropdown>
         </LinearGradient>
+
         {/* 즐겨찾기 */}
         <TouchableOpacity onPress={onPress}>
           <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 3, y: 0 }} colors={[themeColor[4], themeColor[5], themeColor[6]]} style={[styles.content_bottom, { borderColor: themeColor[2] }]}>
             <View>
               <Text style={[styles.HomeText, { paddingVertical: 10 }]}>즐겨찾기 목록</Text>
             </View>
+            <Fontisto name="favorite" size={20} color="#fff" style={{ marginLeft: 10 }} />
           </LinearGradient>
         </TouchableOpacity>
       </View>
@@ -152,6 +163,9 @@ export function NavButton({ props, themeColor }) {
     <View style={{ flex: 1 }}>
       <TouchableOpacity style={[styles.navBox, { borderColor: themeColor[2] }]} onPress={onPress}>
         <Text style={styles.HomeText}>{keyword}</Text>
+        <Text style={{ marginLeft: 5 }}>
+          <Ionicons name="ios-search" size={24} color="#fff" />
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -171,6 +185,7 @@ const styles = StyleSheet.create({
     height: 90,
     justifyContent: 'center',
     alignItems: 'center',
+    flexDirection: 'row',
   },
   HomeText: {
     fontSize: 20,
@@ -179,14 +194,14 @@ const styles = StyleSheet.create({
   },
   content_top: {
     padding: 10,
-    height: 60,
+    height: 90,
     borderBottomWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
   },
   content_bottom: {
-    height: 'auto',
+    height: 90,
     padding: 10,
     borderBottomWidth: 2,
     flexDirection: 'row',

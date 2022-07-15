@@ -64,7 +64,9 @@ export default function Favorites({ route }) {
             <FlatList data={favList} renderItem={renderItem} keyExtractor={(item, index) => index} />
           </View>
         ) : (
-          <Text style={[styles.HomeText, { paddingVertical: 10 }]}>추가된 목록이 없습니다</Text>
+          <View style={{ justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+            <Text style={[styles.HomeText, { paddingVertical: 10 }]}>추가된 목록이 없습니다</Text>
+          </View>
         )}
       </View>
     </View>

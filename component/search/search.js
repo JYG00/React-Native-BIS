@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, TextInput, Text, TouchableOpacity, FlatList } from 'react-native';
+import { StyleSheet, View, TextInput, Text, TouchableOpacity, FlatList, RefreshControl } from 'react-native';
 import { Formik } from 'formik';
 import { useNavigation } from '@react-navigation/native';
 import Loading from '../loading/loading';
+import ScrollDown from '../scrolldown/scrolldown';
 import { LinearGradient } from 'expo-linear-gradient';
+import { FontAwesome } from '@expo/vector-icons';
 
 // 정류소로 검색 페이지
 export const BusStopSch = ({ route }) => {
@@ -127,6 +129,8 @@ export function BusSch({ route }) {
   const [lineid, setLineid] = useState([]);
   // 버스 번호가 담길 공간
   const [bsNum, setBsNum] = useState();
+  // FlatList 새로고침 여부
+  const [refreshing, setRefreshing] = React.useState(false);
 
   let index = 0;
 
@@ -169,7 +173,12 @@ export function BusSch({ route }) {
         setResultCount(str.substring(str.indexOf('<totalCount>') + 12, str.indexOf('</totalCount>')));
         for (let i = 0; i < strArr.length; i++) {
           if (strArr[i].substring(strArr[i].indexOf('nodeid>') + 7) > 1000000) {
-            bsArr.push({ id: strArr[i].substring(7), name: strArr[i - 2].substring(8), index: index++ });
+            // 버스의 위치에 따라서 아이콘 렌더링
+            if (strArr[i + 12].substring(strArr[i + 12].indexOf('lowplate>') + 9) > 0) {
+              bsArr.push({ id: strArr[i].substring(7), name: strArr[i - 2].substring(8), index: index++, now: true });
+            } else {
+              bsArr.push({ id: strArr[i].substring(7), name: strArr[i - 2].substring(8), index: index++, now: false });
+            }
           }
         }
         setLoading(false);
@@ -179,6 +188,19 @@ export function BusSch({ route }) {
 
     xhr.send('');
   };
+
+  // FlatList 새로고침
+  const wait = (timeout) => {
+    return new Promise((resolve) => setTimeout(resolve, timeout));
+  };
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    wait(2000)
+      .then(() => setRefreshing(false))
+      .then(setResultCount(0))
+      .then(onSubmit({ schValue: bsNum }));
+  }, []);
 
   // FlatList Item
   const item = ({ item }) => {
@@ -190,7 +212,10 @@ export function BusSch({ route }) {
       <TouchableOpacity onPress={onPress}>
         <LinearGradient style={styles.result} start={{ x: 0, y: 0 }} end={{ x: 3, y: 0 }} colors={[themeColor[4], themeColor[5], themeColor[6]]}>
           <Text style={{ fontSize: 15, color: '#888' }}>{item.id}</Text>
-          <Text style={{ fontSize: 25 }}>{item.name}</Text>
+          <Text style={{ fontSize: 25 }}>
+            {item.name}
+            <Text style={{ marginLeft: 10 }}> {item.now && <FontAwesome name="bus" size={25} color="black" />}</Text>
+          </Text>
         </LinearGradient>
       </TouchableOpacity>
     );
@@ -218,7 +243,13 @@ export function BusSch({ route }) {
             <View style={styles.title}>
               <Text style={[styles.title_txt, { backgroundColor: themeColor[0] }]}>{bsNum}번 버스 검색결과</Text>
             </View>
-            <FlatList data={lineid} renderItem={item} keyExtractor={(item) => item.index}></FlatList>
+            {/* 버스 노선 방향 표시 */}
+            {(() => {
+              if (resultCount !== 0 && lineid.length > 0) {
+                return <ScrollDown />;
+              }
+            })()}
+            <FlatList data={lineid} renderItem={item} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} keyExtractor={(item) => item.index}></FlatList>
           </View>
         )}
         {(() => {
@@ -269,6 +300,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     padding: 10,
     backgroundColor: '#fff0f0',
+    opacity: 0.5,
     color: '#000',
     fontWeight: '500',
     shadowColor: '#000',
@@ -297,7 +329,7 @@ const styles = StyleSheet.create({
     elevation: 7,
     color: '#888',
     borderColor: '#888',
-    marginBottom: 20,
+    marginVertical: 10,
     paddingLeft: 20,
     paddingTop: 10,
   },

@@ -1,21 +1,34 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BusStopSch, BusSch } from './component/search/search';
 import Favorites from './component/favorites/favorites';
 import { Arrive } from './component/arrive/arrvie';
 import { Home } from './component/home/home';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Entypo } from '@expo/vector-icons';
-import { View, Text } from 'react-native-web';
+import { Text, View, StyleSheet, BackHandler, Alert } from 'react-native';
+import { LogBox } from 'react-native';
 
+LogBox.ignoreLogs(['Warning: ...']); // Ignore log notification by message
+LogBox.ignoreAllLogs(); //Ignore all log notifications
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  const arriveHeader = (
-    <View>
-      <Entypo name="home" size={24} color="black" />
-    </View>
-  );
+  useEffect(() => {
+    const backAction = () => {
+      Alert.alert('알림', '앱을 종료하시겠습니까?', [
+        {
+          text: '취소',
+          onPress: () => null,
+        },
+        { text: '확인', onPress: () => BackHandler.exitApp() },
+      ]);
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+    return () => backHandler.remove();
+  }, []);
 
   return (
     <NavigationContainer>
