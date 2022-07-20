@@ -6,7 +6,7 @@ import { View, Text, StyleSheet, Animated, Button } from 'react-native';
 export default function ScrollDown() {
   const scrollAnim = useRef(new Animated.Value(0)).current;
   const playAnim = () => {
-    Animated.timing(scrollAnim, { toValue: 600, duration: 6000, useNativeDriver: true }).start();
+    Animated.loop(Animated.timing(scrollAnim, { toValue: 600, duration: 2000, useNativeDriver: true }), { iterations: 2 }).start();
   };
   useEffect(() => {
     playAnim();

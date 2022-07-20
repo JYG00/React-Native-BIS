@@ -129,8 +129,6 @@ export function BusSch({ route }) {
   const [lineid, setLineid] = useState([]);
   // 버스 번호가 담길 공간
   const [bsNum, setBsNum] = useState();
-  // FlatList 새로고침 여부
-  const [refreshing, setRefreshing] = React.useState(false);
 
   let index = 0;
 
@@ -189,19 +187,6 @@ export function BusSch({ route }) {
     xhr.send('');
   };
 
-  // FlatList 새로고침
-  const wait = (timeout) => {
-    return new Promise((resolve) => setTimeout(resolve, timeout));
-  };
-
-  const onRefresh = React.useCallback(() => {
-    setRefreshing(true);
-    wait(2000)
-      .then(() => setRefreshing(false))
-      .then(setResultCount(0))
-      .then(onSubmit({ schValue: bsNum }));
-  }, []);
-
   // FlatList Item
   const item = ({ item }) => {
     const onPress = () => {
@@ -243,12 +228,7 @@ export function BusSch({ route }) {
             <View style={styles.title}>
               <Text style={[styles.title_txt, { backgroundColor: themeColor[0] }]}>{bsNum}번 버스 검색결과</Text>
             </View>
-            {/* 버스 노선 방향 표시 */}
-            {(() => {
-              if (resultCount !== 0 && lineid.length > 0) {
-                return <ScrollDown />;
-              }
-            })()}
+
             <FlatList data={lineid} renderItem={item} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} keyExtractor={(item) => item.index}></FlatList>
           </View>
         )}

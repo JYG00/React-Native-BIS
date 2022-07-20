@@ -103,13 +103,13 @@ export function Home() {
           {/* 테마 리스트 */}
           <SelectDropdown
             buttonStyle={{ backgroundColor: 'transparent', width: '100%' }}
-            buttonTextStyle={styles.HomeText}
+            buttonTextStyle={{ color: themeColor[1] }}
             defaultButtonText="테마 변경하기"
             data={colorArr}
             rowStyle={(index) => {
               console.log(index);
             }}
-            rowTextStyle={{ color: '#fff', fontWeight: 'bold' }}
+            rowTextStyle={{ color: '#888' }}
             dropdownStyle={{ backgroundColor: themeColor[7] }}
             onSelect={onSelect}
             buttonTextAfterSelection={(selectedItem, index) => {
@@ -125,9 +125,9 @@ export function Home() {
         <TouchableOpacity onPress={onPress}>
           <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 3, y: 0 }} colors={[themeColor[4], themeColor[5], themeColor[6]]} style={[styles.content_bottom, { borderColor: themeColor[2] }]}>
             <View>
-              <Text style={[styles.HomeText, { paddingVertical: 10 }]}>즐겨찾기 목록</Text>
+              <Text style={{ paddingVertical: 10, color: themeColor[1] }}>즐겨찾기 목록</Text>
             </View>
-            <Fontisto name="favorite" size={20} color="#fff" style={{ marginLeft: 10 }} />
+            <Fontisto name="favorite" size={20} color={themeColor[1]} style={{ marginLeft: 10 }} />
           </LinearGradient>
         </TouchableOpacity>
       </View>
@@ -162,9 +162,9 @@ export function NavButton({ props, themeColor }) {
   return (
     <View style={{ flex: 1 }}>
       <TouchableOpacity style={[styles.navBox, { borderColor: themeColor[2] }]} onPress={onPress}>
-        <Text style={styles.HomeText}>{keyword}</Text>
+        <Text style={{ color: themeColor[1] }}>{keyword}</Text>
         <Text style={{ marginLeft: 5 }}>
-          <Ionicons name="ios-search" size={24} color="#fff" />
+          <Ionicons name="ios-search" size={24} color={themeColor[1]} />
         </Text>
       </TouchableOpacity>
     </View>
@@ -186,11 +186,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
-  },
-  HomeText: {
-    fontSize: 20,
-    color: '#fff',
-    fontWeight: '900',
   },
   content_top: {
     padding: 10,
@@ -224,7 +219,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4.65,
 
     elevation: 7,
-    color: '#888',
     borderColor: '#888',
     marginBottom: 10,
     paddingLeft: 20,

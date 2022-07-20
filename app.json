@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "RN-BIS",
-    "slug": "RN-BIS",
-    "version": "1.0.0",
+    "name": "붓싼버스",
+    "slug": "붓싼버스",
+    "version": "1.0.1",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/1024.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/bus2.png",
+      "image": "./assets/bus4.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -22,7 +22,10 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.jyg00.bis",
+      "useNextNotificationsApi": true,
+      "permissions": []
     },
     "web": {
       "favicon": "./assets/favicon.png"
