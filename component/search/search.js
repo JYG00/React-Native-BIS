@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, TextInput, Text, TouchableOpacity, FlatList, RefreshControl } from 'react-native';
 import { Formik } from 'formik';
 import { useNavigation } from '@react-navigation/native';
 import Loading from '../loading/loading';
-import ScrollDown from '../scrolldown/scrolldown';
+import storage from '../storage/storage';
+import { setColors, getColors } from '../colors/color';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesome } from '@expo/vector-icons';
 
 // 정류소로 검색 페이지
-export const BusStopSch = ({ route }) => {
-  // navigation 으로 받은 테마 색상
-  const [themeColor, setThemeColor] = useState(route.params.themeColor);
+export const BusStopSch = () => {
+  // 테마 색상
+  const [themeColor, setThemeColor] = useState();
   // 도착 시간 페이지로 가기 위함
   const navigation = useNavigation();
   // 총 결과 건수가 담길 공간
@@ -21,6 +22,52 @@ export const BusStopSch = ({ route }) => {
   const [loading, setLoading] = useState(false);
   // 사용자 검색 키워드가 담길 공간
   const [userKeyword, setUserKeyword] = useState();
+  // 테마 색깔을 불러온 후 렌더링
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    // 테마 색깔 가져오기
+    storage
+      .load({
+        key: 'userThemeColor',
+        id: '1',
+
+        autoSync: true,
+
+        syncInBackground: true,
+
+        syncParams: {
+          extraFetchOptions: {},
+          someFlag: true,
+        },
+      })
+      .then((ret) => {
+        setColors(`${ret.themeColor}`);
+
+        let themeColorList = [];
+        getColors().map((colorCode) => colorCode.map((code) => themeColorList.push(code)));
+
+        setThemeColor(themeColorList);
+        setIsReady(true);
+      })
+      .catch((err) => {
+        // console.warn(err.message);
+        switch (err.name) {
+          case 'NotFoundError':
+            // 유저가 테마를 선택하지 않은 경우 기본 테마 (Blue) 적용
+            setColors('Blue');
+
+            let themeColorList = [];
+            getColors().map((colorCode) => colorCode.map((code) => themeColorList.push(code)));
+
+            setThemeColor(themeColorList);
+            setIsReady(true);
+            break;
+          case 'ExpiredError':
+            break;
+        }
+      });
+  }, []);
 
   // 유저가 input 창에서 엔터를 눌렀을때
   const onSubmit = (values) => {
@@ -75,50 +122,53 @@ export const BusStopSch = ({ route }) => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: themeColor[0] }]}>
-      {resultCount === 0 && (
-        <Formik initialValues={{ schValue: '' }} onSubmit={onSubmit}>
-          {({ handleChange, handleSubmit, values }) => (
-            <View>
-              <TextInput style={styles.input} value={values.schValue} onChangeText={handleChange('schValue')} placeholder="정류소를 검색합니다. 예) 부산시청" onSubmitEditing={handleSubmit} />
-            </View>
-          )}
-        </Formik>
-      )}
-      {loading && (
-        <View style={{ flex: 1 }}>
-          <Loading themeColor={themeColor} />
-        </View>
-      )}
-      <View>
-        {resultCount !== 0 && (
-          <View>
-            <View style={styles.title}>
-              <Text style={[styles.title_txt, { backgroundColor: themeColor[0] }]}>검색결과 {resultCount}건 조회</Text>
-            </View>
-            <FlatList data={bstopid} renderItem={item} keyExtractor={(item) => item.id} disableFullscreenUI={false}></FlatList>
+    isReady && (
+      <View style={[styles.container, { backgroundColor: themeColor[0] }]}>
+        {resultCount === 0 && (
+          <Formik initialValues={{ schValue: '' }} onSubmit={onSubmit}>
+            {({ handleChange, handleSubmit, values }) => (
+              <View>
+                <TextInput style={styles.input} value={values.schValue} onChangeText={handleChange('schValue')} placeholder="정류소를 검색합니다. 예) 부산시청" onSubmitEditing={handleSubmit} />
+              </View>
+            )}
+          </Formik>
+        )}
+        {/* 작업이 진행되는 동안 로딩 아이콘 표시 */}
+        {loading && (
+          <View style={{ flex: 1 }}>
+            <Loading themeColor={themeColor} />
           </View>
         )}
-        {(() => {
-          if (resultCount !== 0 && bstopid.length === 0) {
-            return (
-              <View style={{ paddingTop: 200, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ fontSize: 20 }}>
-                  <Text style={{ fontWeight: 'bold' }}>{userKeyword}</Text>와(과) 일치하는 검색결과가 없습니다.
-                </Text>
+        <View>
+          {resultCount !== 0 && (
+            <View>
+              <View style={styles.title}>
+                <Text style={[styles.title_txt, { backgroundColor: themeColor[0] }]}>검색결과 {resultCount}건 조회</Text>
               </View>
-            );
-          }
-        })()}
+              <FlatList data={bstopid} renderItem={item} keyExtractor={(item) => item.id} disableFullscreenUI={false}></FlatList>
+            </View>
+          )}
+          {(() => {
+            if (resultCount !== 0 && bstopid.length === 0) {
+              return (
+                <View style={{ paddingTop: 200, justifyContent: 'center', alignItems: 'center' }}>
+                  <Text style={{ fontSize: 20 }}>
+                    <Text style={{ fontWeight: 'bold' }}>{userKeyword}</Text>와(과) 일치하는 검색결과가 없습니다.
+                  </Text>
+                </View>
+              );
+            }
+          })()}
+        </View>
       </View>
-    </View>
+    )
   );
 };
 
 // 버스로 검색 페이지
-export function BusSch({ route }) {
-  // navigation 으로 받은 테마 색상
-  const [themeColor, setThemeColor] = useState(route.params.themeColor);
+export function BusSch() {
+  // 테마 색상
+  const [themeColor, setThemeColor] = useState();
   // 로딩 아이콘 사용유무
   const [loading, setLoading] = useState(false);
   // 도착 시간 페이지로 가기 위함
@@ -129,6 +179,52 @@ export function BusSch({ route }) {
   const [lineid, setLineid] = useState([]);
   // 버스 번호가 담길 공간
   const [bsNum, setBsNum] = useState();
+  // 테마 색깔을 불러온 후 렌더링
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    // 테마 색깔 가져오기
+    storage
+      .load({
+        key: 'userThemeColor',
+        id: '1',
+
+        autoSync: true,
+
+        syncInBackground: true,
+
+        syncParams: {
+          extraFetchOptions: {},
+          someFlag: true,
+        },
+      })
+      .then((ret) => {
+        setColors(`${ret.themeColor}`);
+
+        let themeColorList = [];
+        getColors().map((colorCode) => colorCode.map((code) => themeColorList.push(code)));
+
+        setThemeColor(themeColorList);
+        setIsReady(true);
+      })
+      .catch((err) => {
+        // console.warn(err.message);
+        switch (err.name) {
+          case 'NotFoundError':
+            // 유저가 테마를 선택하지 않은 경우 기본 테마 (Blue) 적용
+            setColors('Blue');
+
+            let themeColorList = [];
+            getColors().map((colorCode) => colorCode.map((code) => themeColorList.push(code)));
+
+            setThemeColor(themeColorList);
+            setIsReady(true);
+            break;
+          case 'ExpiredError':
+            break;
+        }
+      });
+  }, []);
 
   let index = 0;
 
@@ -207,42 +303,44 @@ export function BusSch({ route }) {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: themeColor[0] }]}>
-      {resultCount === 0 && (
-        <Formik initialValues={{ schValue: '' }} onSubmit={onSubmit}>
-          {({ handleChange, handleSubmit, values }) => (
-            <View>
-              <TextInput style={styles.input} value={values.schValue} onChangeText={handleChange('schValue')} placeholder="버스를 검색합니다. 예) 1, 11, 111" onSubmitEditing={handleSubmit} />
-            </View>
-          )}
-        </Formik>
-      )}
-      {loading && (
-        <View style={{ flex: 1 }}>
-          <Loading themeColor={themeColor} />
-        </View>
-      )}
-      <View>
-        {resultCount !== 0 && (
-          <View>
-            <View style={styles.title}>
-              <Text style={[styles.title_txt, { backgroundColor: themeColor[0] }]}>{bsNum}번 버스 검색결과</Text>
-            </View>
-
-            <FlatList data={lineid} renderItem={item} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} keyExtractor={(item) => item.index}></FlatList>
+    isReady && (
+      <View style={[styles.container, { backgroundColor: themeColor[0] }]}>
+        {resultCount === 0 && (
+          <Formik initialValues={{ schValue: '' }} onSubmit={onSubmit}>
+            {({ handleChange, handleSubmit, values }) => (
+              <View>
+                <TextInput style={styles.input} value={values.schValue} onChangeText={handleChange('schValue')} placeholder="버스를 검색합니다. 예) 1, 11, 111" onSubmitEditing={handleSubmit} />
+              </View>
+            )}
+          </Formik>
+        )}
+        {loading && (
+          <View style={{ flex: 1 }}>
+            <Loading themeColor={themeColor} />
           </View>
         )}
-        {(() => {
-          if (resultCount !== 0 && lineid.length === 0) {
-            return (
-              <View style={{ paddingTop: 200, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ fontSize: 20 }}>일치하는 검색결과가 없습니다.</Text>
+        <View>
+          {resultCount !== 0 && (
+            <View>
+              <View style={styles.title}>
+                <Text style={[styles.title_txt, { backgroundColor: themeColor[0] }]}>{bsNum}번 버스 검색결과</Text>
               </View>
-            );
-          }
-        })()}
+
+              <FlatList data={lineid} renderItem={item} keyExtractor={(item) => item.index}></FlatList>
+            </View>
+          )}
+          {(() => {
+            if (resultCount !== 0 && lineid.length === 0) {
+              return (
+                <View style={{ paddingTop: 200, justifyContent: 'center', alignItems: 'center' }}>
+                  <Text style={{ fontSize: 20 }}>일치하는 검색결과가 없습니다.</Text>
+                </View>
+              );
+            }
+          })()}
+        </View>
       </View>
-    </View>
+    )
   );
 }
 

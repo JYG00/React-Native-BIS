@@ -1,8 +1,8 @@
 {
   "expo": {
     "name": "붓싼버스",
-    "slug": "붓싼버스",
-    "version": "1.0.1",
+    "slug": "React-Native-BIS",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/1024.png",
     "userInterfaceStyle": "light",
@@ -20,10 +20,10 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
+        "foregroundImage": "./assets/1024.png"
       },
-      "package": "com.jyg00.bis",
+      "package": "com.jyg00.bisBusan",
+      "versionCode": 2,
       "useNextNotificationsApi": true,
       "permissions": []
     },
